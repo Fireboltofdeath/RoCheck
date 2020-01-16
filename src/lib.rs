@@ -136,10 +136,10 @@ impl RoCheck {
 			.text().await?;
 
 		lazy_static! {
-			static ref sig_removal: Regex = Regex::new("--.*\r\n").expect("Regex is invalid");
+			static ref SIG_REMOVAL: Regex = Regex::new("--.*\r\n").expect("Regex is invalid");
 		}
 		
-		let resp: HashMap<String, Value> = serde_json::from_str( sig_removal.replace(&pltxt, "").as_ref() )?;
+		let resp: HashMap<String, Value> = serde_json::from_str( SIG_REMOVAL.replace(&pltxt, "").as_ref() )?;
 		
 		Ok(resp)
 	}
