@@ -16,7 +16,7 @@ Using RoCheck is simple, simply feed it in a couple values, and boom!
 ```rust
 use rocheck::RoCheck;
 
-async fn main() -> Result<(), Box<std::error::Error>> {
+async fn check() -> Result<(), Box<dyn std::error::Error>> {
 	let client = RoCheck::new("Your Bot Token");
 
 	let test_ip = "127.0.0.1";
@@ -28,5 +28,7 @@ async fn main() -> Result<(), Box<std::error::Error>> {
 	if is_roblox {
 		println!("Hoorah! You're a real roblox server!");
 	}
+
+	Ok(())
 }
 ```
