@@ -1,4 +1,4 @@
-[![crates.io](https://meritbadge.herokuapp.com/rocheck)](https://crates.io/crates/rocheck)
+[![crates.io](https://meritbadge.herokuapp.com/rocheck?)](https://crates.io/crates/rocheck)
 [![Released API docs](https://docs.rs/rocheck/badge.svg)](https://docs.rs/rocheck)
 
 # RoCheck
