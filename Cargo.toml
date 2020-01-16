@@ -1,5 +1,5 @@
 [package]
-name = "ro_check"
+name = "rocheck"
 version = "0.1.0"
 authors = ["Fireboltofdeath"]
 edition = "2018"
