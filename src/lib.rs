@@ -52,11 +52,3 @@ impl RoCheck {
 		Ok(mach_ip == ip)
 	}
 }
-
-pub async fn test() -> Error<()> {
-	let rcd: RoCheck = RoCheck::new("cook");
-	let _game = rcd.get_ip(27574, "SOME JOB ID LOL XDD").await?;
-	let _verified = rcd.verify_ip(27574, "SOME JOB ID LOL XDD", "127.0.0.1").await?;
-
-	Ok(())
-}
