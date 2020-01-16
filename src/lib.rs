@@ -77,12 +77,17 @@ impl RoCheck {
 		```
 	*/
 	pub async fn get_data(&self, place_id: i64, job_id: &str) -> Error<HashMap<String, serde_json::Value>> {
-		let init_data = self.send_http(&format!("https://assetgame.roblox.com/Game/PlaceLauncher.ashx?request=RequestGameJob&placeId={}&gameId={}", place_id, job_id), Some(place_id)).await?;
+		lazy_static! {
+			static ref SIG_REMOVAL: Regex = Regex::new("--.*\r\n").expect("Regex is invalid");
+		}
+
+		let init_data: HashMap<String, Value> = self.send_http(&format!("https://assetgame.roblox.com/Game/PlaceLauncher.ashx?request=RequestGameJob&placeId={}&gameId={}", place_id, job_id), Some(place_id)).await?.json().await?;
 
 		let join_url = init_data.get("joinScriptUrl").expect("joinScriptUrl does not exist");
 		
 		if let Value::String(join_url) = join_url {
-			let game_data = self.send_http(&join_url, None).await?;
+			let game_resp = self.send_http(&join_url, None).await?.text().await?;
+			let game_data: HashMap<String, Value> = serde_json::from_str( SIG_REMOVAL.replace(&game_resp, "").as_ref() )?;
 
 			Ok(game_data)
 		} else {
@@ -116,12 +121,32 @@ impl RoCheck {
 	*/
 	pub async fn verify_ip(&self, place_id: i64, job_id: &str, ip: &str) -> Error<bool> {
 		let mach_ip = self.get_ip(place_id, job_id).await?;
-		println!("{} ! {}", mach_ip, ip);
+		
 		Ok(mach_ip == ip)
 	}
 
+	/**
+		This function is equivalent to verify_ip, however it will always return true/false.
+		If this function fails, it will return false.
+		This is useful for cases where you don't need to know why it failed (e.g place_id doesn't exist, or job id doesn't exist) without adding boilerplate.
+		```rust
+		let my_ip = "127.0.0.1";
+		let client = RoCheck::new("MySecurityToken");
 
-	async fn send_http(&self, url: &str, place_info: Option<i64>) -> Error<HashMap<String, serde_json::Value>> {
+		let ip_verified = client.validate_ip(123456, "JobIdFromRequest", my_ip).await;
+		```
+	*/
+	pub async fn validate_ip(&self, place_id: i64, job_id: &str, ip: &str) -> bool {
+		let verified = self.verify_ip(place_id, job_id, ip).await;
+
+		if let Ok(verified) = verified {
+			verified
+		} else {
+			false
+		}
+	}
+
+	async fn send_http(&self, url: &str, place_info: Option<i64>) -> Error<reqwest::Response> {
 		let mut req = self.client.request(reqwest::Method::GET, url)
 			.header("Cookie", format!(".ROBLOSECURITY={}", self.cookie));
 
@@ -133,16 +158,7 @@ impl RoCheck {
 		}
 
 		let req = req.build()?;
-
-		let pltxt: String = self.client.execute(req).await?
-			.text().await?;
-
-		lazy_static! {
-			static ref SIG_REMOVAL: Regex = Regex::new("--.*\r\n").expect("Regex is invalid");
-		}
 		
-		let resp: HashMap<String, Value> = serde_json::from_str( SIG_REMOVAL.replace(&pltxt, "").as_ref() )?;
-		
-		Ok(resp)
+		Ok(self.client.execute(req).await?)
 	}
 }
