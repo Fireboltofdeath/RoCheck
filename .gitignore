@@ -1,3 +1,7 @@
 /target
 **/*.rs.bk
 Cargo.lock
+
+/example_app/target
+/example_app/**/*.rs.bk
+/example_app/Cargo.lock

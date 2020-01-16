@@ -30,10 +30,14 @@
 	```
 */
 
+#[macro_use] extern crate lazy_static;
 
 mod models;
 use std::collections::HashMap;
 use models::*;
+use serde_json::Value;
+use regex::Regex;
+
 
 pub struct RoCheck {
 	cookie: String,
@@ -70,14 +74,18 @@ impl RoCheck {
 		data.get("some-field")
 		```
 	*/
-	pub async fn get_data(&self, place_id: i32, job_id: &str) -> Error<HashMap<String, String>> {
-		let init_data = self.send_http(&format!("https://assetgame.roblox.com/Game/PlaceLauncher.ashx?request=RequestGameJob&placeId={}&gameId={}", place_id, job_id)).await?;
+	pub async fn get_data(&self, place_id: i64, job_id: &str) -> Error<HashMap<String, serde_json::Value>> {
+		let init_data = self.send_http(&format!("https://assetgame.roblox.com/Game/PlaceLauncher.ashx?request=RequestGameJob&placeId={}&gameId={}", place_id, job_id), Some(place_id)).await?;
 
 		let join_url = init_data.get("joinScriptUrl").expect("joinScriptUrl does not exist");
+		
+		if let Value::String(join_url) = join_url {
+			let game_data = self.send_http(&join_url, None).await?;
 
-		let game_data = self.send_http(&join_url).await?;
-
-		Ok(game_data)
+			Ok(game_data)
+		} else {
+			Err(Box::new(RoError::Failure("Join URL is not there")))
+		}
 	}
 
 	/**
@@ -87,12 +95,12 @@ impl RoCheck {
 		let ip = client.get_ip(123456, "JobIdFromRequest").await?;
 		```
 	*/
-	pub async fn get_ip(&self, place_id: i32, job_id: &str) -> Error<String> {
+	pub async fn get_ip(&self, place_id: i64, job_id: &str) -> Error<String> {
 		let game_data = self.get_data(place_id, job_id).await?;
 
 		let machine_addr = game_data.get("MachineAddress").expect("MachineAddress does not exist");
 
-		Ok(machine_addr.to_string())
+		Ok(machine_addr.as_str().unwrap().to_string())
 	}
 
 	/**
@@ -104,19 +112,34 @@ impl RoCheck {
 		let ip_verified = client.verify_ip(123456, "JobIdFromRequest", my_ip).await?;
 		```
 	*/
-	pub async fn verify_ip(&self, place_id: i32, job_id: &str, ip: &str) -> Error<bool> {
+	pub async fn verify_ip(&self, place_id: i64, job_id: &str, ip: &str) -> Error<bool> {
 		let mach_ip = self.get_ip(place_id, job_id).await?;
+		println!("{} ! {}", mach_ip, ip);
 		Ok(mach_ip == ip)
 	}
 
 
-	async fn send_http(&self, url: &str) -> Error<HashMap<String, String>> {
-		let req: reqwest::Request = self.client.request(reqwest::Method::GET, url)
-			.header("Cookie", format!(".ROBLOSECURITY={}", self.cookie))
-				.build()?;
+	async fn send_http(&self, url: &str, place_info: Option<i64>) -> Error<HashMap<String, serde_json::Value>> {
+		let mut req = self.client.request(reqwest::Method::GET, url)
+			.header("Cookie", format!(".ROBLOSECURITY={}", self.cookie));
+
+
+		if let Some(placeid) = place_info {
+			req = req.header("Referer", format!("https://www.roblox.com/games/{}", placeid));
+			req = req.header("Origin", "https://www.roblox.com");
+			req = req.header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36")
+		}
+
+		let req = req.build()?;
+
+		let pltxt: String = self.client.execute(req).await?
+			.text().await?;
+
+		lazy_static! {
+			static ref sig_removal: Regex = Regex::new("--.*\r\n").expect("Regex is invalid");
+		}
 		
-		let resp: HashMap<String, String> = self.client.execute(req).await?
-			.json().await?;
+		let resp: HashMap<String, Value> = serde_json::from_str( sig_removal.replace(&pltxt, "").as_ref() )?;
 		
 		Ok(resp)
 	}
