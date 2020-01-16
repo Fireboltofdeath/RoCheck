@@ -6,6 +6,8 @@ edition = "2018"
 description = "RoCheck implementation ported to Rust"
 license = "MIT"
 
+readme = "README.md"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 # t
 
