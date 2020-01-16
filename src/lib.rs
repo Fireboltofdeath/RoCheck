@@ -14,14 +14,14 @@
 	```
 	use rocheck::RoCheck;
 
-	fn main() {
+	async fn main() -> Result<(), Box<std::error::Error>> {
 		let client = RoCheck::new("Your Bot Token");
 
 		let test_ip = "127.0.0.1";
 		let job_id = "SomeLongStringOfCharactersShouldGoHere";
 		let place_id = 123456;
 
-		let is_roblox = client.verify_ip(place_id, job_id, test_ip);
+		let is_roblox = client.verify_ip(place_id, job_id, test_ip).await?;
 
 		if is_roblox {
 			println!("Hoorah! You're a real roblox server!");
