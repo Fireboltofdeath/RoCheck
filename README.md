@@ -1,5 +1,6 @@
 [![crates.io](https://meritbadge.herokuapp.com/rocheck?)](https://crates.io/crates/rocheck)
 [![Released API docs](https://docs.rs/rocheck/badge.svg)](https://docs.rs/rocheck)
+[![Build Status](https://travis-ci.com/Fireboltofdeath/RoCheck.svg?branch=master)](https://travis-ci.com/Fireboltofdeath/RoCheck)
 
 # RoCheck
 An implementation of [grilme99](https://github.com/grilme99)'s [RoCheck](https://github.com/grilme99/RoCheck) module in Rust.
