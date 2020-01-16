@@ -8,7 +8,7 @@ Credits to him for the method used.
 ## Installation
 ```toml
 [dependencies]
-rocheck = "0.1"
+rocheck = "0.2"
 ```
 
 ## Usage
