@@ -7,6 +7,8 @@ description = "RoCheck implementation ported to Rust"
 license = "MIT"
 
 readme = "README.md"
+repository = "https://github.com/Fireboltofdeath/RoCheck"
+documentation = "https://docs.rs/rocheck"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 # t
