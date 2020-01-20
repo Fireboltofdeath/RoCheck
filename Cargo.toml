@@ -1,6 +1,6 @@
 [package]
 name = "rocheck"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Fireboltofdeath"]
 edition = "2018"
 description = "RoCheck implementation ported to Rust"
