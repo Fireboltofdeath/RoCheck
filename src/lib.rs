@@ -49,11 +49,14 @@ pub struct RoCheck {
 impl RoCheck {
 	/**
 		Create and initialize a new RoCheck class.
-		```rust
-		# use std::error::Error
+		```rust,no_run
+		# use std::error::Error;
+		# extern crate rocheck;
+		# use rocheck::RoCheck;
 		#
 		# fn main() -> Result<(), Box<dyn Error>> {
 		let client = RoCheck::new("MySecurityToken");
+		# Ok(())
 		# }
 		```
 	*/
@@ -70,10 +73,15 @@ impl RoCheck {
 
 	/**
 		Retrieve additional data other than the IP.
-		```rust
+		```rust,no_run
+		# extern crate rocheck;
+		# use rocheck::RoCheck;
+		# async fn test() -> Result<(), Box<dyn std::error::Error>> {
 		let client = RoCheck::new("MySecurityToken");
 		let data = client.get_data(123456, "JobIdFromRequest").await?;
-		data.get("some-field")
+		data.get("some-field");
+		# Ok(())
+		# }
 		```
 	*/
 	pub async fn get_data(&self, place_id: i64, job_id: &str) -> Error<HashMap<String, serde_json::Value>> {
@@ -97,9 +105,14 @@ impl RoCheck {
 
 	/**
 		Retrieve the IP belonging to this PlaceId and JobId
-		```rust
+		```rust,no_run
+		# extern crate rocheck;
+		# use rocheck::RoCheck;
+		# async fn test() -> Result<(), Box<dyn std::error::Error>> {
 		let client = RoCheck::new("MySecurityToken");
 		let ip = client.get_ip(123456, "JobIdFromRequest").await?;
+		# Ok(())
+		# }
 		```
 	*/
 	pub async fn get_ip(&self, place_id: i64, job_id: &str) -> Error<String> {
@@ -112,11 +125,16 @@ impl RoCheck {
 
 	/**
 		Retrieve the IP belonging to this PlaceId and JobId and compare it to the inputted IP.
-		```rust
+		```rust,no_run
+		# extern crate rocheck;
+		# use rocheck::RoCheck;
+		# async fn test() -> Result<(), Box<dyn std::error::Error>> {
 		let my_ip = "127.0.0.1";
 		let client = RoCheck::new("MySecurityToken");
 		
 		let ip_verified = client.verify_ip(123456, "JobIdFromRequest", my_ip).await?;
+		# Ok(())
+		# }
 		```
 	*/
 	pub async fn verify_ip(&self, place_id: i64, job_id: &str, ip: &str) -> Error<bool> {
@@ -129,11 +147,16 @@ impl RoCheck {
 		This function is equivalent to verify_ip, however it will always return true/false.
 		If this function fails, it will return false.
 		This is useful for cases where you don't need to know why it failed (e.g place_id doesn't exist, or job id doesn't exist) without adding boilerplate.
-		```rust
+		```rust,no_run
+		# extern crate rocheck;
+		# use rocheck::RoCheck;
+		# async fn test() -> Result<(), Box<dyn std::error::Error>> {
 		let my_ip = "127.0.0.1";
 		let client = RoCheck::new("MySecurityToken");
 
-		let ip_verified = client.validate_ip(123456, "JobIdFromRequest", my_ip).await;
+		let ip_verified = client.validate_ip(123456i64, "JobIdFromRequest", my_ip).await;
+		# Ok(())
+		# }
 		```
 	*/
 	pub async fn validate_ip(&self, place_id: i64, job_id: &str, ip: &str) -> bool {
