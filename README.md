@@ -5,7 +5,7 @@
 
 # RoCheck
 An implementation of [grilme99](https://github.com/grilme99)'s [RoCheck](https://github.com/grilme99/RoCheck) module in Rust.
-Credits to him for the method used.
+Credits to her for the method used.
 
 ## Installation
 ```toml
